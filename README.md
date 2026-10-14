@@ -37,6 +37,9 @@ browser <seggwat-board data-token=…> ──vote/unvote with token──▶ seg
 
 1. Project settings → **End-User Authentication** → *Signed tokens (JWT)* → generate the signing secret.
 2. Add your site's origin (e.g. `https://example.com`) to the project's **allowed origins**.
+3. Set `SEGGWAT_PROJECT_KEY` and `SEGGWAT_SIGNING_SECRET` on your server
+   (`SEGGWAT_API_URL` is optional, default `https://seggwat.com`).
+   `Seggwat::from_env(site_origin)` reads them and returns `None` without a project key.
 
 ## Topcoat
 
@@ -49,16 +52,14 @@ seggwat-topcoat = "0.1"
 use seggwat::{Seggwat, Viewer};
 use seggwat_topcoat::roadmap_board;
 
-static SEGGWAT: LazyLock<Seggwat> = LazyLock::new(|| Seggwat::new(
-    "https://seggwat.com",
-    env::var("SEGGWAT_PROJECT_KEY").unwrap(),
-    "https://example.com",                    // your public origin
-    env::var("SEGGWAT_SIGNING_SECRET").ok(),
-));
+// your public origin; None when SEGGWAT_PROJECT_KEY is unset
+static SEGGWAT: LazyLock<Option<Seggwat>> =
+    LazyLock::new(|| Seggwat::from_env("https://example.com"));
+let Some(seggwat) = SEGGWAT.as_ref() else { /* board disabled */ };
 
 let viewer = user.map(|u| Viewer { id: u.id, email: Some(u.email), name: u.name });
-let voting = SEGGWAT.voting(viewer.as_ref(), "/login?next=/roadmap");
-let roadmap = SEGGWAT.roadmap().await?;
+let voting = seggwat.voting(viewer.as_ref(), "/login?next=/roadmap");
+let roadmap = seggwat.roadmap().await?;
 view! { roadmap_board(roadmap: &roadmap, voting: &voting) }
 ```
 
@@ -79,7 +80,8 @@ server = ["dioxus/server", "seggwat/client"]
 #[get("/api/roadmap")]
 async fn roadmap_data() -> Result<(Roadmap, Voting), ServerFnError> {
     // let viewer = <your session user>;
-    Ok((SEGGWAT.roadmap().await?, SEGGWAT.voting(viewer.as_ref(), "/login")))
+    let seggwat = SEGGWAT.as_ref().ok_or_else(|| ServerFnError::new("seggwat not configured"))?;
+    Ok((seggwat.roadmap().await?, seggwat.voting(viewer.as_ref(), "/login")))
 }
 
 #[component]

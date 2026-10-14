@@ -76,6 +76,26 @@ impl Seggwat {
         }
     }
 
+    /// Builds the client from `SEGGWAT_PROJECT_KEY`, `SEGGWAT_SIGNING_SECRET`
+    /// (optional) and `SEGGWAT_API_URL` (optional, default
+    /// `https://seggwat.com`). `None` when no project key is set.
+    pub fn from_env(site_origin: impl Into<String>) -> Option<Self> {
+        Self::from_vars(|name| std::env::var(name).ok(), site_origin)
+    }
+
+    fn from_vars(
+        get: impl Fn(&str) -> Option<String>,
+        site_origin: impl Into<String>,
+    ) -> Option<Self> {
+        let get = |name| get(name).filter(|v| !v.is_empty());
+        Some(Self::new(
+            get("SEGGWAT_API_URL").unwrap_or_else(|| "https://seggwat.com".into()),
+            get("SEGGWAT_PROJECT_KEY")?,
+            site_origin,
+            get("SEGGWAT_SIGNING_SECRET"),
+        ))
+    }
+
     /// Open, planned and in-progress ideas, most votes first.
     pub async fn ideas(&self) -> Result<IdeaList, Error> {
         self.get(&format!("ideas?limit={PAGE_SIZE}")).await
@@ -260,5 +280,50 @@ mod tests {
         let voting = client(None).voting(Some(&viewer()), "/login");
         assert_eq!(voting.token, None);
         assert_eq!(voting.api_base, "https://seggwat.test");
+    }
+
+    fn from_vars(vars: &[(&str, &str)]) -> Option<Seggwat> {
+        Seggwat::from_vars(
+            |name| {
+                vars.iter()
+                    .find(|(k, _)| *k == name)
+                    .map(|(_, v)| v.to_string())
+            },
+            "https://app.test",
+        )
+    }
+
+    #[test]
+    fn from_vars_needs_a_project_key() {
+        assert!(from_vars(&[]).is_none());
+        assert!(from_vars(&[("SEGGWAT_PROJECT_KEY", "")]).is_none());
+    }
+
+    #[test]
+    fn from_vars_defaults_api_url_and_secret() {
+        let client = from_vars(&[("SEGGWAT_PROJECT_KEY", "proj-1")]).unwrap();
+        assert_eq!(client.api_base, "https://seggwat.com");
+        assert_eq!(client.project_key, "proj-1");
+        assert_eq!(client.site_origin, "https://app.test");
+        assert!(client.token(&viewer()).is_none());
+
+        let client = from_vars(&[
+            ("SEGGWAT_PROJECT_KEY", "proj-1"),
+            ("SEGGWAT_API_URL", "https://seggwat.test/"),
+            ("SEGGWAT_SIGNING_SECRET", "s3cret"),
+        ])
+        .unwrap();
+        assert_eq!(client.api_base, "https://seggwat.test");
+        assert!(client.token(&viewer()).is_some());
+    }
+
+    #[test]
+    fn from_vars_treats_empty_secret_as_unset() {
+        let client = from_vars(&[
+            ("SEGGWAT_PROJECT_KEY", "proj-1"),
+            ("SEGGWAT_SIGNING_SECRET", ""),
+        ])
+        .unwrap();
+        assert!(client.token(&viewer()).is_none());
     }
 }
