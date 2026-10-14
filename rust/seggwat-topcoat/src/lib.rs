@@ -12,15 +12,20 @@ use ::topcoat::{
 pub use seggwat;
 use seggwat::{
     ChangelogPage, Idea, IdeaList, Roadmap, Voting,
-    ui::{category_badge, class, status_label},
+    ui::{self, category_badge, class, status_label},
 };
 
 /// The vote module. Boards with a token include it themselves.
 pub const VOTE_JS: Asset = asset!("../assets/seggwat-board.js");
 
-/// Votable ideas, most votes first.
+/// Votable ideas, most votes first. `hide_credit` removes the "Powered by
+/// SeggWat" line.
 #[component]
-pub async fn idea_board(ideas: &IdeaList, voting: &Voting) -> Result<impl View> {
+pub async fn idea_board(
+    ideas: &IdeaList,
+    voting: &Voting,
+    #[default] hide_credit: bool,
+) -> Result<impl View> {
     Ok(view! {
         board(voting: voting,
             if ideas.items.is_empty() {
@@ -33,12 +38,20 @@ pub async fn idea_board(ideas: &IdeaList, voting: &Voting) -> Result<impl View> 
                 </ul>
             }
         )
+        if !hide_credit {
+            credit()
+        }
     })
 }
 
-/// Planned, in-progress and shipped ideas as three columns.
+/// Planned, in-progress and shipped ideas as three columns. `hide_credit`
+/// removes the "Powered by SeggWat" line.
 #[component]
-pub async fn roadmap_board(roadmap: &Roadmap, voting: &Voting) -> Result<impl View> {
+pub async fn roadmap_board(
+    roadmap: &Roadmap,
+    voting: &Voting,
+    #[default] hide_credit: bool,
+) -> Result<impl View> {
     let columns = [
         ("Planned", &roadmap.planned, true),
         ("In progress", &roadmap.started, true),
@@ -63,13 +76,20 @@ pub async fn roadmap_board(roadmap: &Roadmap, voting: &Voting) -> Result<impl Vi
                 }
             </div>
         )
+        if !hide_credit {
+            credit()
+        }
     })
 }
 
 /// Published changelog entries, newest first. Bodies come from
 /// [`seggwat::Seggwat::changelog`], which renders the Markdown safely.
+/// `hide_credit` removes the "Powered by SeggWat" line.
 #[component]
-pub async fn changelog_feed(page: &ChangelogPage) -> Result<impl View> {
+pub async fn changelog_feed(
+    page: &ChangelogPage,
+    #[default] hide_credit: bool,
+) -> Result<impl View> {
     Ok(view! {
         if page.items.is_empty() {
             <p class=(class::EMPTY)>"No updates yet."</p>
@@ -95,6 +115,9 @@ pub async fn changelog_feed(page: &ChangelogPage) -> Result<impl View> {
                     </article>
                 }
             </div>
+        }
+        if !hide_credit {
+            credit()
         }
     })
 }
@@ -173,5 +196,15 @@ async fn arrow() -> Result<impl View> {
         <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d=(class::ARROW_PATH)></path>
         </svg>
+    })
+}
+
+#[component]
+async fn credit() -> Result<impl View> {
+    Ok(view! {
+        <p class=(class::CREDIT)>
+            "Powered by "
+            <a href=(ui::CREDIT_URL) rel=(ui::CREDIT_REL) class=(class::CREDIT_LINK)>"SeggWat"</a>
+        </p>
     })
 }

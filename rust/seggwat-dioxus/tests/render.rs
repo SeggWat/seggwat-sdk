@@ -50,3 +50,31 @@ fn changelog_renders_meta_and_body() {
         ChangelogFeed { page: fixture_changelog() }
     }));
 }
+
+#[test]
+fn credit_is_nofollow_and_can_be_hidden() {
+    assert_credit(
+        &dioxus_ssr::render_element(rsx! {
+            IdeaBoard { ideas: fixture_ideas(), voting: fixture_voting(None) }
+        }),
+        true,
+    );
+    assert_credit(
+        &dioxus_ssr::render_element(rsx! {
+            ChangelogFeed { page: fixture_changelog() }
+        }),
+        true,
+    );
+    assert_credit(
+        &dioxus_ssr::render_element(rsx! {
+            IdeaBoard { ideas: fixture_ideas(), voting: fixture_voting(None), hide_credit: true }
+        }),
+        false,
+    );
+    assert_credit(
+        &dioxus_ssr::render_element(rsx! {
+            ChangelogFeed { page: fixture_changelog(), hide_credit: true }
+        }),
+        false,
+    );
+}

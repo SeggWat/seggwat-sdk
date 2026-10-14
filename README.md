@@ -96,6 +96,11 @@ fn RoadmapPage() -> Element {
 
 ## Notes
 
+- Each component ends with a small "Powered by SeggWat" line. Hide it with
+  `hide_credit: true`. The link is `nofollow`: it ships by default on every
+  site, which Google treats as a widget link. If you want to credit SeggWat
+  with a followed link, hide this one and add your own.
+
 - A page that carries a viewer's token belongs to that user. Don't put it in a shared cache.
 - The components use Tailwind + DaisyUI classes, and changelog bodies use `prose`
   (`@tailwindcss/typography`). When the crate comes from crates.io or git, add

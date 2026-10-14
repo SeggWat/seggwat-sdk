@@ -68,3 +68,11 @@ pub fn assert_changelog(html: &str) {
     assert!(html.contains("badge-success") && html.contains("Added"));
     assert!(html.contains("<p><strong>yes</strong></p>"));
 }
+
+pub fn assert_credit(html: &str, shown: bool) {
+    // Escaping of `&` differs per framework, so match around it.
+    let link = r#"href="https://seggwat.com/?utm_source=seggwat-sdk&"#;
+    let rel = r#"utm_medium=board" rel="nofollow noopener""#;
+    assert_eq!(html.contains(link) && html.contains(rel), shown, "{html}");
+    assert_eq!(html.contains("Powered by"), shown);
+}

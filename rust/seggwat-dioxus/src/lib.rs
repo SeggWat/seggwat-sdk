@@ -9,14 +9,15 @@ use ::dioxus::prelude::*;
 pub use seggwat;
 use seggwat::{
     ChangelogPage, Idea, IdeaList, Roadmap, Voting,
-    ui::{category_badge, class, status_label},
+    ui::{self, category_badge, class, status_label},
 };
 
 const VOTE_JS: Asset = asset!("/assets/seggwat-board.js");
 
-/// Votable ideas, most votes first.
+/// Votable ideas, most votes first. `hide_credit` removes the "Powered by
+/// SeggWat" line.
 #[component]
-pub fn IdeaBoard(ideas: IdeaList, voting: Voting) -> Element {
+pub fn IdeaBoard(ideas: IdeaList, voting: Voting, #[props(default)] hide_credit: bool) -> Element {
     rsx! {
         Board { voting: voting.clone(),
             if ideas.items.is_empty() {
@@ -29,12 +30,20 @@ pub fn IdeaBoard(ideas: IdeaList, voting: Voting) -> Element {
                 }
             }
         }
+        if !hide_credit {
+            Credit {}
+        }
     }
 }
 
-/// Planned, in-progress and shipped ideas as three columns.
+/// Planned, in-progress and shipped ideas as three columns. `hide_credit`
+/// removes the "Powered by SeggWat" line.
 #[component]
-pub fn RoadmapBoard(roadmap: Roadmap, voting: Voting) -> Element {
+pub fn RoadmapBoard(
+    roadmap: Roadmap,
+    voting: Voting,
+    #[props(default)] hide_credit: bool,
+) -> Element {
     let columns = [
         ("Planned", roadmap.planned, true),
         ("In progress", roadmap.started, true),
@@ -62,18 +71,22 @@ pub fn RoadmapBoard(roadmap: Roadmap, voting: Voting) -> Element {
                 }
             }
         }
+        if !hide_credit {
+            Credit {}
+        }
     }
 }
 
 /// Published changelog entries, newest first. Bodies come from
 /// [`seggwat::Seggwat::changelog`], which renders the Markdown safely.
+/// `hide_credit` removes the "Powered by SeggWat" line.
 #[component]
-pub fn ChangelogFeed(page: ChangelogPage) -> Element {
-    if page.items.is_empty() {
-        return rsx! { p { class: class::EMPTY, "No updates yet." } };
-    }
+pub fn ChangelogFeed(page: ChangelogPage, #[props(default)] hide_credit: bool) -> Element {
     rsx! {
-        div { class: class::FEED,
+        if page.items.is_empty() {
+            p { class: class::EMPTY, "No updates yet." }
+        } else {
+            div { class: class::FEED,
             for entry in page.items {
                 article { key: "{entry.id}", id: "{entry.id}",
                     div { class: class::ENTRY_META,
@@ -92,6 +105,10 @@ pub fn ChangelogFeed(page: ChangelogPage) -> Element {
                     div { class: class::PROSE, dangerous_inner_html: entry.body_html }
                 }
             }
+        }
+        }
+        if !hide_credit {
+            Credit {}
         }
     }
 }
@@ -183,6 +200,16 @@ fn Arrow() -> Element {
             stroke_linejoin: "round",
             "aria-hidden": "true",
             path { d: class::ARROW_PATH }
+        }
+    }
+}
+
+#[component]
+fn Credit() -> Element {
+    rsx! {
+        p { class: class::CREDIT,
+            "Powered by "
+            a { href: ui::CREDIT_URL, rel: ui::CREDIT_REL, class: class::CREDIT_LINK, "SeggWat" }
         }
     }
 }

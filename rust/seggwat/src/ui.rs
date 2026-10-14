@@ -20,7 +20,17 @@ pub mod class {
     pub const ENTRY_TITLE: &str = "mt-2 text-2xl font-bold";
     pub const PROSE: &str = "prose mt-4 max-w-none";
     pub const ARROW_PATH: &str = "m18 15-6-6-6 6";
+    pub const CREDIT: &str = "mt-6 text-right text-xs text-base-content/50";
+    pub const CREDIT_LINK: &str = "link link-hover";
 }
+
+/// Target of the "Powered by SeggWat" credit under each component.
+pub const CREDIT_URL: &str = "https://seggwat.com/?utm_source=seggwat-sdk&utm_medium=board";
+
+/// The credit ships by default on every site using the SDK, which is what
+/// Google's link-spam policy calls a widget link, so it is not followed. Sites
+/// that want a followed link hide the credit and render their own.
+pub const CREDIT_REL: &str = "nofollow noopener";
 
 /// Display label for an idea status.
 pub fn status_label(status: &str) -> &str {

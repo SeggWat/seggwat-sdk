@@ -79,3 +79,20 @@ async fn changelog_renders_meta_and_body() {
     let html = html(view! { cx => changelog_feed(page: &page) }).await;
     assert_changelog(&html);
 }
+
+#[tokio::test]
+async fn credit_is_nofollow_and_can_be_hidden() {
+    for hide in [false, true] {
+        let (ideas, voting) = (fixture_ideas(), fixture_voting(None));
+        let cx = &app_cx();
+        let board =
+            html(view! { cx => idea_board(ideas: &ideas, voting: &voting, hide_credit: hide) })
+                .await;
+        assert_credit(&board, !hide);
+
+        let page = fixture_changelog();
+        let cx = &app_cx();
+        let feed = html(view! { cx => changelog_feed(page: &page, hide_credit: hide) }).await;
+        assert_credit(&feed, !hide);
+    }
+}
