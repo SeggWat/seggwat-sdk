@@ -1,0 +1,20 @@
+[package]
+name = "seggwat-topcoat"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "SeggWat feature voting, roadmap and changelog as server-rendered Topcoat components"
+readme = "README.md"
+keywords = ["seggwat", "topcoat", "roadmap", "changelog", "feature-voting"]
+include = ["src/**", "assets/**", "safelist.html", "README.md", "Cargo.toml"]
+
+[dependencies]
+seggwat = { workspace = true }
+topcoat = { version = "=0.10.0", default-features = false, features = ["view", "asset"] }
+
+[dev-dependencies]
+serde_json = { workspace = true }
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }

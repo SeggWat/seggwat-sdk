@@ -1,0 +1,16 @@
+[workspace]
+resolver = "3"
+members = ["rust/*"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+authors = ["Hauke Jung <hauke.jung@outlook.de>"]
+license = "MIT"
+repository = "https://github.com/SeggWat/seggwat-sdk"
+homepage = "https://seggwat.com"
+
+[workspace.dependencies]
+seggwat = { path = "rust/seggwat", version = "0.1.0" }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"

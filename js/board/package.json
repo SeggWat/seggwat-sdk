@@ -1,0 +1,13 @@
+{
+  "name": "@seggwat/board",
+  "version": "0.1.0",
+  "description": "<seggwat-board> web component: vote buttons for a server-rendered SeggWat feature board",
+  "type": "module",
+  "main": "seggwat-board.js",
+  "exports": "./seggwat-board.js",
+  "files": ["seggwat-board.js", "README.md"],
+  "license": "MIT",
+  "repository": { "type": "git", "url": "git+https://github.com/SeggWat/seggwat-sdk.git", "directory": "js/board" },
+  "homepage": "https://seggwat.com",
+  "keywords": ["seggwat", "feature-voting", "roadmap", "web-component"]
+}
