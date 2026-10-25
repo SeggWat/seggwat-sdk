@@ -13,7 +13,7 @@ include = ["src/**", "assets/**", "safelist.html", "README.md", "Cargo.toml"]
 
 [dependencies]
 seggwat = { workspace = true }
-topcoat = { version = "=0.10.0", default-features = false, features = ["view", "asset"] }
+topcoat = { version = "=0.11.0", default-features = false, features = ["view", "asset"] }
 
 [dev-dependencies]
 serde_json = { workspace = true }
