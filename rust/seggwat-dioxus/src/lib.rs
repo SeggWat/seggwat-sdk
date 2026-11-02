@@ -1,4 +1,4 @@
-//! SeggWat ideas board, roadmap and changelog as Dioxus components, with the
+//! SeggWat ideas board, roadmap, changelog and support chat as Dioxus components, with the
 //! same markup as `seggwat-topcoat`. Fetch the data on the server (server
 //! function or `use_server_future`) and pass it in; the components only
 //! render. The vote module updates button state in place, so keep the props
@@ -8,11 +8,12 @@ use ::dioxus::prelude::*;
 
 pub use seggwat;
 use seggwat::{
-    ChangelogPage, Idea, IdeaList, Roadmap, Voting,
+    ChangelogPage, Chat, Idea, IdeaList, Roadmap, Voting,
     ui::{self, category_badge, class, status_label},
 };
 
 const VOTE_JS: Asset = asset!("/assets/seggwat-board.js");
+const CHAT_JS: Asset = asset!("/assets/seggwat-chat.js");
 
 /// Votable ideas, most votes first. `hide_credit` removes the "Powered by
 /// SeggWat" line.
@@ -106,6 +107,32 @@ pub fn ChangelogFeed(page: ChangelogPage, #[props(default)] hide_credit: bool) -
                 }
             }
         }
+        }
+        if !hide_credit {
+            Credit {}
+        }
+    }
+}
+
+/// Live support chat for the signed-in user, inline in your page. Logged-out
+/// visitors get a link to `chat.login_url` and no script. The chat is 32rem
+/// tall by default; size it with CSS on `seggwat-chat`. `hide_credit` removes
+/// the "Powered by SeggWat" line.
+#[component]
+pub fn SupportChat(chat: Chat, #[props(default)] hide_credit: bool) -> Element {
+    rsx! {
+        if let Some(token) = chat.token {
+            document::Script { r#type: "module", src: CHAT_JS }
+            seggwat-chat {
+                "data-api": chat.api_base,
+                "data-project": chat.project_key,
+                "data-token": token,
+                p { class: class::EMPTY, "Loading chat…" }
+            }
+        } else {
+            p { class: class::EMPTY,
+                a { href: chat.login_url, class: class::CHAT_LOGIN, "Sign in to chat with us" }
+            }
         }
         if !hide_credit {
             Credit {}

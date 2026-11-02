@@ -52,6 +52,15 @@ pub fn fixture_voting(token: Option<&str>) -> seggwat::Voting {
     }
 }
 
+pub fn fixture_chat(token: Option<&str>) -> seggwat::Chat {
+    seggwat::Chat {
+        api_base: "https://seggwat.test".into(),
+        project_key: "proj".into(),
+        token: token.map(str::to_string),
+        login_url: "/login?next=/support".into(),
+    }
+}
+
 pub fn assert_roadmap(html: &str) {
     assert!(html.contains("Planned") && html.contains("In progress") && html.contains("Shipped"));
     assert!(html.contains(r#"data-seggwat-vote="p""#), "{html}");

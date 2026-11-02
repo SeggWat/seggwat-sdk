@@ -22,6 +22,7 @@ pub mod class {
     pub const ARROW_PATH: &str = "m18 15-6-6-6 6";
     pub const CREDIT: &str = "mt-6 text-right text-xs text-base-content/50";
     pub const CREDIT_LINK: &str = "link link-hover";
+    pub const CHAT_LOGIN: &str = "link";
 }
 
 /// Target of the "Powered by SeggWat" credit under each component.

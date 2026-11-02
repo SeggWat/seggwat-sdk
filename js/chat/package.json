@@ -1,0 +1,13 @@
+{
+  "name": "@seggwat/chat",
+  "version": "0.1.0",
+  "description": "<seggwat-chat> web component: SeggWat live support chat inside your own page",
+  "type": "module",
+  "main": "seggwat-chat.js",
+  "exports": "./seggwat-chat.js",
+  "files": ["seggwat-chat.js", "README.md"],
+  "license": "MIT",
+  "repository": { "type": "git", "url": "git+https://github.com/SeggWat/seggwat-sdk.git", "directory": "js/chat" },
+  "homepage": "https://seggwat.com",
+  "keywords": ["seggwat", "support", "live-chat", "web-component"]
+}

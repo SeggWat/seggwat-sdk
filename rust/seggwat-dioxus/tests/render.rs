@@ -5,7 +5,7 @@ mod fixtures;
 
 use dioxus::prelude::*;
 use fixtures::*;
-use seggwat_dioxus::{ChangelogFeed, IdeaBoard, RoadmapBoard};
+use seggwat_dioxus::{ChangelogFeed, IdeaBoard, RoadmapBoard, SupportChat};
 
 #[test]
 fn vote_module_matches_the_js_package() {
@@ -14,6 +14,36 @@ fn vote_module_matches_the_js_package() {
         include_str!("../../../js/board/seggwat-board.js"),
         "run `just sync-js`"
     );
+}
+
+#[test]
+fn chat_module_matches_the_js_package() {
+    assert_eq!(
+        include_str!("../assets/seggwat-chat.js"),
+        include_str!("../../../js/chat/seggwat-chat.js"),
+        "run `just sync-js`"
+    );
+}
+
+#[test]
+fn signed_in_chat_mounts_the_module() {
+    let html = dioxus_ssr::render_element(rsx! {
+        SupportChat { chat: fixture_chat(Some("tok")) }
+    });
+    assert!(html.contains(r#"data-token="tok""#), "{html}");
+    assert!(html.contains(r#"data-project="proj""#));
+    assert!(html.contains("<seggwat-chat"));
+    assert_credit(&html, true);
+}
+
+#[test]
+fn signed_out_chat_links_to_login() {
+    let html = dioxus_ssr::render_element(rsx! {
+        SupportChat { chat: fixture_chat(None), hide_credit: true }
+    });
+    assert!(html.contains(r#"href="/login?next=/support""#), "{html}");
+    assert!(!html.contains("seggwat-chat"));
+    assert_credit(&html, false);
 }
 
 #[test]

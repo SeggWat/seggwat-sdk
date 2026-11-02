@@ -1,7 +1,7 @@
-# The vote module lives in js/board; the Rust crates ship copies for their asset! macros.
+# The web components live in js/; the Rust crates ship copies for their asset! macros.
 sync-js:
-    cp js/board/seggwat-board.js rust/seggwat-topcoat/assets/
-    cp js/board/seggwat-board.js rust/seggwat-dioxus/assets/
+    cp js/board/seggwat-board.js js/chat/seggwat-chat.js rust/seggwat-topcoat/assets/
+    cp js/board/seggwat-board.js js/chat/seggwat-chat.js rust/seggwat-dioxus/assets/
 
 check:
     cargo fmt --all --check

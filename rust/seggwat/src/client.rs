@@ -17,7 +17,7 @@ use hmac::{Hmac, Mac};
 use serde::{Serialize, de::DeserializeOwned};
 use sha2::Sha256;
 
-use crate::{ChangelogPage, IdeaList, Roadmap, Voting};
+use crate::{ChangelogPage, Chat, IdeaList, Roadmap, Voting};
 
 const CACHE_TTL: Duration = Duration::from_secs(60);
 const TOKEN_TTL_SECS: u64 = 60 * 60;
@@ -120,6 +120,21 @@ impl Seggwat {
     /// page that carries one in a shared cache.
     pub fn voting(&self, viewer: Option<&Viewer>, login_url: impl Into<String>) -> Voting {
         Voting {
+            api_base: self.api_base.clone(),
+            project_key: self.project_key.clone(),
+            token: viewer.and_then(|v| self.token(v)),
+            login_url: login_url.into(),
+        }
+    }
+
+    /// Everything the support chat needs. Pass the signed-in user, or `None`
+    /// for an anonymous visitor (the chat then links to `login_url`). Live
+    /// Chat must be turned on in the project's widget settings.
+    ///
+    /// The token is the viewer's own and expires after an hour; do not put a
+    /// page that carries one in a shared cache.
+    pub fn chat(&self, viewer: Option<&Viewer>, login_url: impl Into<String>) -> Chat {
+        Chat {
             api_base: self.api_base.clone(),
             project_key: self.project_key.clone(),
             token: viewer.and_then(|v| self.token(v)),
