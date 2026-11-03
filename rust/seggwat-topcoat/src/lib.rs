@@ -1,7 +1,7 @@
-//! SeggWat ideas board, roadmap and changelog as server-rendered Topcoat
+//! SeggWat ideas board, roadmap, changelog and support chat as server-rendered Topcoat
 //! components. Fetch with `seggwat::Seggwat` (feature `client`) and render.
 //! Logged-out visitors need no script at all; signed-in visitors load the vote
-//! module from the app's asset bundle.
+//! and chat modules from the app's asset bundle.
 
 use ::topcoat::{
     Result,
@@ -11,12 +11,15 @@ use ::topcoat::{
 
 pub use seggwat;
 use seggwat::{
-    ChangelogPage, Idea, IdeaList, Roadmap, Voting,
+    ChangelogPage, Chat, Idea, IdeaList, Roadmap, Voting,
     ui::{self, category_badge, class, status_label},
 };
 
 /// The vote module. Boards with a token include it themselves.
 pub const VOTE_JS: Asset = asset!("../assets/seggwat-board.js");
+
+/// The chat module. A chat with a token includes it itself.
+pub const CHAT_JS: Asset = asset!("../assets/seggwat-chat.js");
 
 /// Votable ideas, most votes first. `hide_credit` removes the "Powered by
 /// SeggWat" line.
@@ -115,6 +118,33 @@ pub async fn changelog_feed(
                     </article>
                 }
             </div>
+        }
+        if !hide_credit {
+            credit()
+        }
+    })
+}
+
+/// Live support chat for the signed-in user, inline in your page. Logged-out
+/// visitors get a link to `chat.login_url` and no script. The chat is 32rem
+/// tall by default; size it with CSS on `seggwat-chat`. `hide_credit` removes
+/// the "Powered by SeggWat" line.
+#[component]
+pub async fn support_chat(chat: &Chat, #[default] hide_credit: bool) -> Result<impl View> {
+    Ok(view! {
+        if let Some(token) = &chat.token {
+            <seggwat-chat
+                data-api=(&chat.api_base)
+                data-project=(&chat.project_key)
+                data-token=(token)
+            >
+                <p class=(class::EMPTY)>"Loading chat…"</p>
+            </seggwat-chat>
+            <script type="module" src=(CHAT_JS)></script>
+        } else {
+            <p class=(class::EMPTY)>
+                <a href=(&chat.login_url) class=(class::CHAT_LOGIN)>"Sign in to chat with us"</a>
+            </p>
         }
         if !hide_credit {
             credit()

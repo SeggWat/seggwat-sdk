@@ -93,3 +93,17 @@ pub struct Voting {
     pub token: Option<String>,
     pub login_url: String,
 }
+
+/// What a page needs to show the live support chat.
+///
+/// Like [`Voting`], the browser talks to SeggWat directly. `token` is the
+/// signed-in user's short-lived end-user JWT; `None` renders a link to
+/// `login_url` instead of the chat.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct Chat {
+    /// SeggWat origin, e.g. `https://seggwat.com`.
+    pub api_base: String,
+    pub project_key: String,
+    pub token: Option<String>,
+    pub login_url: String,
+}

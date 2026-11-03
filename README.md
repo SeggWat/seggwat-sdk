@@ -8,9 +8,10 @@ indexable and styled like the rest of the site.
 | package | what it is |
 |---|---|
 | [`seggwat`](rust/seggwat) | Rust: public board API types; feature `client` adds a cached server-side client, safe Markdown rendering and end-user token signing |
-| [`seggwat-topcoat`](rust/seggwat-topcoat) | Rust: `idea_board`, `roadmap_board`, `changelog_feed` for [Topcoat](https://github.com/tokio-rs/topcoat) |
-| [`seggwat-dioxus`](rust/seggwat-dioxus) | Rust: `IdeaBoard`, `RoadmapBoard`, `ChangelogFeed` for Dioxus 0.7 |
+| [`seggwat-topcoat`](rust/seggwat-topcoat) | Rust: `idea_board`, `roadmap_board`, `changelog_feed`, `support_chat` for [Topcoat](https://github.com/tokio-rs/topcoat) |
+| [`seggwat-dioxus`](rust/seggwat-dioxus) | Rust: `IdeaBoard`, `RoadmapBoard`, `ChangelogFeed`, `SupportChat` for Dioxus 0.7 |
 | [`@seggwat/board`](js/board) | the `<seggwat-board>` web component that makes vote buttons work, in any framework |
+| [`@seggwat/chat`](js/chat) | the `<seggwat-chat>` web component: live support chat inline in your page, in any framework |
 
 Leptos, React and a Node/Bun server client are planned. They follow the same
 pattern, so the web component stays the same.
@@ -94,6 +95,26 @@ fn RoadmapPage() -> Element {
 }
 ```
 
+## Support chat
+
+Live chat for signed-in users, inline in your own page (a `/support` page,
+account settings) instead of only behind the feedback button. Turn on **Live
+Chat** in the project's widget settings (Pro), then:
+
+```rust
+// Topcoat
+let chat = seggwat.chat(viewer.as_ref(), "/login?next=/support");
+view! { support_chat(chat: &chat) }
+
+// Dioxus: return `seggwat.chat(...)` from a server function, then
+rsx! { SupportChat { chat } }
+```
+
+It uses the same end-user token as voting. Logged-out visitors get a sign-in
+link and no script. The chat loads SeggWat's hosted chat module, so it gets
+fixes without an SDK update. It is 32rem tall by default (size `seggwat-chat`
+with CSS), and there is one chat per page.
+
 ## Notes
 
 - Each component ends with a small "Powered by SeggWat" line. Hide it with
@@ -109,8 +130,8 @@ fn RoadmapPage() -> Element {
 ## Development
 
 `just check` runs what CI runs. The vote module's source is
-`js/board/seggwat-board.js`; after editing it, run `just sync-js` to copy it
-into the Rust crates (a test fails if the copies drift).
+`js/board/seggwat-board.js` and the chat's is `js/chat/seggwat-chat.js`; after
+editing either, run `just sync-js` to copy them into the Rust crates (a test fails if the copies drift).
 
 ## License
 

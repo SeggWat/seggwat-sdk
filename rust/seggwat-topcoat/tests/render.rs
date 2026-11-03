@@ -4,7 +4,7 @@
 mod fixtures;
 
 use fixtures::*;
-use seggwat_topcoat::{VOTE_JS, changelog_feed, idea_board, roadmap_board};
+use seggwat_topcoat::{CHAT_JS, VOTE_JS, changelog_feed, idea_board, roadmap_board, support_chat};
 use topcoat::{
     asset::{AssetConfig, Manifest, ManifestEntry},
     context::{Cx, CxTestBuilder},
@@ -15,12 +15,20 @@ use topcoat::{
 fn app_cx() -> Cx {
     let manifest = Manifest {
         version: 1,
-        assets: vec![ManifestEntry {
-            id: VOTE_JS.id(),
-            file: "seggwat-board-abc.js".into(),
-            hash: "abc".into(),
-            content_type: "text/javascript".into(),
-        }],
+        assets: vec![
+            ManifestEntry {
+                id: VOTE_JS.id(),
+                file: "seggwat-board-abc.js".into(),
+                hash: "abc".into(),
+                content_type: "text/javascript".into(),
+            },
+            ManifestEntry {
+                id: CHAT_JS.id(),
+                file: "seggwat-chat-def.js".into(),
+                hash: "def".into(),
+                content_type: "text/javascript".into(),
+            },
+        ],
     };
     CxTestBuilder::new()
         .app_context(AssetConfig::hosted_at("/assets", manifest))
@@ -38,6 +46,40 @@ fn vote_module_matches_the_js_package() {
         include_str!("../../../js/board/seggwat-board.js"),
         "run `just sync-js`"
     );
+}
+
+#[test]
+fn chat_module_matches_the_js_package() {
+    assert_eq!(
+        include_str!("../assets/seggwat-chat.js"),
+        include_str!("../../../js/chat/seggwat-chat.js"),
+        "run `just sync-js`"
+    );
+}
+
+#[tokio::test]
+async fn signed_in_chat_mounts_the_module() {
+    let chat = fixture_chat(Some("tok"));
+    let cx = &app_cx();
+    let html = html(view! { cx => support_chat(chat: &chat) }).await;
+    assert!(
+        html.contains(
+            r#"<seggwat-chat data-api="https://seggwat.test" data-project="proj" data-token="tok">"#
+        ),
+        "{html}"
+    );
+    assert!(html.contains(r#"<script type="module" src="/assets/seggwat-chat-def.js">"#));
+    assert_credit(&html, true);
+}
+
+#[tokio::test]
+async fn signed_out_chat_links_to_login_without_script() {
+    let chat = fixture_chat(None);
+    let cx = &app_cx();
+    let html = html(view! { cx => support_chat(chat: &chat, hide_credit: true) }).await;
+    assert!(html.contains(r#"href="/login?next=/support""#), "{html}");
+    assert!(!html.contains("seggwat-chat") && !html.contains("<script"));
+    assert_credit(&html, false);
 }
 
 #[tokio::test]
