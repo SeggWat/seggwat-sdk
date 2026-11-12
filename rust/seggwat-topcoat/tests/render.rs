@@ -7,7 +7,7 @@ use fixtures::*;
 use seggwat_topcoat::{CHAT_JS, VOTE_JS, changelog_feed, idea_board, roadmap_board, support_chat};
 use topcoat::{
     asset::{AssetConfig, Manifest, ManifestEntry},
-    context::{Cx, CxTestBuilder},
+    context::Cx,
     view::{View, ViewExt, view},
 };
 
@@ -30,9 +30,7 @@ fn app_cx() -> Cx {
             },
         ],
     };
-    CxTestBuilder::new()
-        .app_context(AssetConfig::hosted_at("/assets", manifest))
-        .build()
+    Cx::new().with(AssetConfig::hosted_at("/assets", manifest))
 }
 
 async fn html(v: impl View) -> String {
@@ -61,7 +59,7 @@ fn chat_module_matches_the_js_package() {
 async fn signed_in_chat_mounts_the_module() {
     let chat = fixture_chat(Some("tok"));
     let cx = &app_cx();
-    let html = html(view! { cx => support_chat(chat: &chat) }).await;
+    let html = html(view! { support_chat(chat: &chat) }).await;
     assert!(
         html.contains(
             r#"<seggwat-chat data-api="https://seggwat.test" data-project="proj" data-token="tok">"#
@@ -76,7 +74,7 @@ async fn signed_in_chat_mounts_the_module() {
 async fn signed_out_chat_links_to_login_without_script() {
     let chat = fixture_chat(None);
     let cx = &app_cx();
-    let html = html(view! { cx => support_chat(chat: &chat, hide_credit: true) }).await;
+    let html = html(view! { support_chat(chat: &chat, hide_credit: true) }).await;
     assert!(html.contains(r#"href="/login?next=/support""#), "{html}");
     assert!(!html.contains("seggwat-chat") && !html.contains("<script"));
     assert_credit(&html, false);
@@ -86,7 +84,7 @@ async fn signed_out_chat_links_to_login_without_script() {
 async fn signed_in_board_has_vote_buttons_and_the_module() {
     let (ideas, voting) = (fixture_ideas(), fixture_voting(Some("tok")));
     let cx = &app_cx();
-    let html = html(view! { cx => idea_board(ideas: &ideas, voting: &voting) }).await;
+    let html = html(view! { idea_board(ideas: &ideas, voting: &voting) }).await;
     assert!(html.contains(r#"data-token="tok""#), "{html}");
     assert!(html.contains(r#"data-seggwat-vote="a""#));
     assert!(html.contains(r#"aria-pressed="false""#));
@@ -99,7 +97,7 @@ async fn signed_in_board_has_vote_buttons_and_the_module() {
 async fn signed_out_board_links_to_login_without_script() {
     let (ideas, voting) = (fixture_ideas(), fixture_voting(None));
     let cx = &app_cx();
-    let html = html(view! { cx => idea_board(ideas: &ideas, voting: &voting) }).await;
+    let html = html(view! { idea_board(ideas: &ideas, voting: &voting) }).await;
     assert!(html.contains(r#"href="/login?next=/ideas""#), "{html}");
     assert!(!html.contains("data-seggwat-vote"));
     assert!(!html.contains("data-token"));
@@ -110,7 +108,7 @@ async fn signed_out_board_links_to_login_without_script() {
 async fn roadmap_votes_only_on_open_columns() {
     let (roadmap, voting) = (fixture_roadmap(), fixture_voting(Some("tok")));
     let cx = &app_cx();
-    let html = html(view! { cx => roadmap_board(roadmap: &roadmap, voting: &voting) }).await;
+    let html = html(view! { roadmap_board(roadmap: &roadmap, voting: &voting) }).await;
     assert_roadmap(&html);
 }
 
@@ -118,7 +116,7 @@ async fn roadmap_votes_only_on_open_columns() {
 async fn changelog_renders_meta_and_body() {
     let page = fixture_changelog();
     let cx = &app_cx();
-    let html = html(view! { cx => changelog_feed(page: &page) }).await;
+    let html = html(view! { changelog_feed(page: &page) }).await;
     assert_changelog(&html);
 }
 
@@ -128,13 +126,12 @@ async fn credit_is_nofollow_and_can_be_hidden() {
         let (ideas, voting) = (fixture_ideas(), fixture_voting(None));
         let cx = &app_cx();
         let board =
-            html(view! { cx => idea_board(ideas: &ideas, voting: &voting, hide_credit: hide) })
-                .await;
+            html(view! { idea_board(ideas: &ideas, voting: &voting, hide_credit: hide) }).await;
         assert_credit(&board, !hide);
 
         let page = fixture_changelog();
         let cx = &app_cx();
-        let feed = html(view! { cx => changelog_feed(page: &page, hide_credit: hide) }).await;
+        let feed = html(view! { changelog_feed(page: &page, hide_credit: hide) }).await;
         assert_credit(&feed, !hide);
     }
 }

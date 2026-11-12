@@ -6,6 +6,7 @@
 use ::topcoat::{
     Result,
     asset::{Asset, asset},
+    context::Cx,
     view::{Child, Unescaped, View, component, view},
 };
 
@@ -25,6 +26,7 @@ pub const CHAT_JS: Asset = asset!("../assets/seggwat-chat.js");
 /// SeggWat" line.
 #[component]
 pub async fn idea_board(
+    cx: &Cx,
     ideas: &IdeaList,
     voting: &Voting,
     #[default] hide_credit: bool,
@@ -51,6 +53,7 @@ pub async fn idea_board(
 /// removes the "Powered by SeggWat" line.
 #[component]
 pub async fn roadmap_board(
+    cx: &Cx,
     roadmap: &Roadmap,
     voting: &Voting,
     #[default] hide_credit: bool,
@@ -90,6 +93,7 @@ pub async fn roadmap_board(
 /// `hide_credit` removes the "Powered by SeggWat" line.
 #[component]
 pub async fn changelog_feed(
+    cx: &Cx,
     page: &ChangelogPage,
     #[default] hide_credit: bool,
 ) -> Result<impl View> {
@@ -130,7 +134,7 @@ pub async fn changelog_feed(
 /// tall by default; size it with CSS on `seggwat-chat`. `hide_credit` removes
 /// the "Powered by SeggWat" line.
 #[component]
-pub async fn support_chat(chat: &Chat, #[default] hide_credit: bool) -> Result<impl View> {
+pub async fn support_chat(cx: &Cx, chat: &Chat, #[default] hide_credit: bool) -> Result<impl View> {
     Ok(view! {
         if let Some(token) = &chat.token {
             <seggwat-chat
@@ -153,7 +157,7 @@ pub async fn support_chat(chat: &Chat, #[default] hide_credit: bool) -> Result<i
 }
 
 #[component]
-async fn board(voting: &Voting, child: Child<'_>) -> Result<impl View> {
+async fn board(cx: &Cx, voting: &Voting, child: Child<'_>) -> Result<impl View> {
     Ok(view! {
         <seggwat-board
             data-api=(&voting.api_base)
@@ -169,7 +173,7 @@ async fn board(voting: &Voting, child: Child<'_>) -> Result<impl View> {
 }
 
 #[component]
-async fn idea_card(idea: &Idea, voting: &Voting, votable: bool) -> Result<impl View> {
+async fn idea_card(cx: &Cx, idea: &Idea, voting: &Voting, votable: bool) -> Result<impl View> {
     Ok(view! {
         <li class=(class::CARD)>
             <div class=(class::CARD_BODY)>
@@ -197,7 +201,7 @@ async fn idea_card(idea: &Idea, voting: &Voting, votable: bool) -> Result<impl V
 }
 
 #[component]
-async fn vote_button(idea: &Idea, voting: &Voting) -> Result<impl View> {
+async fn vote_button(cx: &Cx, idea: &Idea, voting: &Voting) -> Result<impl View> {
     let label = format!("Vote for {}", idea.title);
     Ok(view! {
         if voting.token.is_some() {
@@ -221,7 +225,7 @@ async fn vote_button(idea: &Idea, voting: &Voting) -> Result<impl View> {
 }
 
 #[component]
-async fn arrow() -> Result<impl View> {
+async fn arrow(cx: &Cx) -> Result<impl View> {
     Ok(view! {
         <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d=(class::ARROW_PATH)></path>
@@ -230,7 +234,7 @@ async fn arrow() -> Result<impl View> {
 }
 
 #[component]
-async fn credit() -> Result<impl View> {
+async fn credit(cx: &Cx) -> Result<impl View> {
     Ok(view! {
         <p class=(class::CREDIT)>
             "Powered by "
